@@ -16,7 +16,7 @@ use App\Entity\Url;
 final class UrlController extends AbstractController
 {
     #[Route('/shorten', name: 'shorten_url', methods: ["POST"])]
-    public function shorten(Request $request, EntityManagerInterface $em): JsonResponse
+    public function shorten(Request $request, EntityManagerInterface $em, UrlRepository $urlRepository): JsonResponse
     {
         try {
             $data = json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR);
@@ -24,9 +24,15 @@ final class UrlController extends AbstractController
             return new JsonResponse(['error' => 'Invalid JSON'], 400);
         }
         $originalUrl = $data['url'] ?? null;
-        if (!$originalUrl) {
-            return new  JsonResponse(['error' => 'No URL provided'], 400);
+        if (!$originalUrl || !filter_var($originalUrl, FILTER_VALIDATE_URL)) {
+            return new  JsonResponse(['error' => 'Invalid URL'], 400);
         }
+        //check that long url doesn't exist already, because if it is, just return it instead
+        $existingEntity = $urlRepository->findOneBy(['originalUrl' => $originalUrl]);
+        if ($existingEntity !== null) {
+            return new JsonResponse(['short_url' => $existingEntity->getShortCode()], 200);
+        }
+        //now lets create new one
         $shortUrl = uniqid('abc', true);
 
         $url = new Url();

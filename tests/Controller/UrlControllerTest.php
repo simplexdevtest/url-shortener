@@ -23,7 +23,7 @@ class UrlControllerTest extends WebTestCase
             'CONTENT_TYPE' => 'application/json',
         ], json_encode(['url' => self::TEST_URL], JSON_THROW_ON_ERROR));
 
-        $this->assertResponseIsSuccessful();
+        self::assertResponseIsSuccessful();
 
         $responseContent = $client->getResponse()->getContent();
         $this->assertJson($responseContent);

@@ -17,5 +17,4 @@ class UrlRepository extends ServiceEntityRepository
     {
         return $this->findOneBy(['shortCode' => $shortCode]);
     }
-
 }
