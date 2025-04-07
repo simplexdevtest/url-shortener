@@ -3,64 +3,67 @@
 namespace App\Entity;
 
 use App\Repository\UrlRepository;
+
 use DateTimeImmutable;
 use Doctrine\ORM\Mapping as ORM;
 
-#[ORM\Entity(repositoryClass: UrlRepository::class)]
+#[Orm\Entity(repositoryClass: UrlRepository::class)]
+#[Orm\Table(name: "short_urls")]
+#[Orm\HasLifecycleCallbacks]
 class Url
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[ORM\Column]
+    #[ORM\Column(type: 'integer')]
     private ?int $id = null;
 
-    #[ORM\Column(length: 255)]
-    private ?string $originalUrl = null;
+    #[ORM\Column(name: 'original_url', type: 'string',length: 2048)]
+    private string $originalUrl;
 
-    #[ORM\Column(length: 255)]
-    private ?string $shortUrl = null;
+    #[ORM\Column(name: 'short_code', type: 'string', length: 64, unique: true)]
+    private string $shortCode;
 
-    #[ORM\Column(type: "datetime_immutable", options:["default" => "CURRENT_TIMESTAMP"])]
-    private ?DateTimeImmutable $createdAt;
+    #[ORM\Column(name: 'created_at', type: 'datetime_immutable')]
+    private DateTimeImmutable $createdAt;
+
 
     public function getId(): ?int
     {
         return $this->id;
     }
 
-    public function getOriginalUrl(): ?string
+    public function getOriginalUrl(): string
     {
         return $this->originalUrl;
     }
 
-    public function setOriginalUrl(string $originalUrl): static
+    public function setOriginalUrl(string $originalUrl): self
     {
         $this->originalUrl = $originalUrl;
-
         return $this;
     }
 
-    public function getShortUrl(): ?string
+    public function getShortCode(): string
     {
-        return $this->shortUrl;
+        return $this->shortCode;
     }
 
-    public function setShortUrl(string $shortUrl): static
+    public function setShortCode(string $shortCode): self
     {
-        $this->shortUrl = $shortUrl;
-
+        $this->shortCode = $shortCode;
         return $this;
     }
 
-    public function getCreatedAt(): ?DateTimeImmutable
+
+    public function getCreatedAt(): \DateTimeImmutable
     {
-        return $this->shortUrl;
+        return $this->createdAt;
     }
 
-    public function setCreatedAt(DateTimeImmutable $createdAt): static
+    #[ORM\PrePersist]
+    public function setCreatedAtValue(): void
     {
-        $this->createdAt = $createdAt;
-
-        return $this;
+        $this->createdAt = new DateTimeImmutable('now');
     }
+
 }
